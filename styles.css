@@ -1,0 +1,97 @@
+body {
+  width: 400px;
+  padding: 10px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+}
+
+h3, h4 {
+  margin: 0 0 10px 0;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+input {
+  width: 100%;
+  padding: 5px;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+}
+
+button {
+  width: 100%;
+  padding: 8px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+#settingsButton {
+  background-color: #dc3545;
+  margin-bottom: 10px;
+}
+
+#settingsButton:hover {
+  background-color: #c82333;
+}
+
+#reviewSection {
+  margin-top: 20px;
+}
+
+#reviewContent {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 3px;
+  background-color: #f9f9f9;
+}
+
+.markdown h1 {
+  font-size: 1.5em;
+  margin: 10px 0;
+}
+
+.markdown h2 {
+  font-size: 1.3em;
+  margin: 8px 0;
+}
+
+.markdown h3 {
+  font-size: 1.1em;
+  margin: 6px 0;
+}
+
+.markdown ul {
+  padding-left: 20px;
+  margin: 5px 0;
+}
+
+.markdown li {
+  margin: 3px 0;
+}
+
+.markdown pre {
+  background-color: #f0f0f0;
+  padding: 10px;
+  border-radius: 3px;
+  overflow-x: auto;
+}
+
+.markdown code {
+  font-family: monospace;
+}
+
+.markdown strong {
+  font-weight: bold;
+}

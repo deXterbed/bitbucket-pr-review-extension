@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bitbucket PR Review</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h3>Bitbucket PR Review</h3>
+  <div id="apiKeySection">
+    <label for="apiKey">OpenAI API Key:</label>
+    <input type="text" id="apiKey" placeholder="Enter your OpenAI API key">
+    <button id="saveButton">Save</button>
+  </div>
+  <button id="settingsButton" style="display: none;">Settings</button>
+  <div id="reviewSection" style="display: none;">
+    <h4>Latest Review</h4>
+    <div id="reviewContent" class="markdown"></div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

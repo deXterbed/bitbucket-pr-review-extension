@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Bitbucket PR Review Extension",
+  "version": "1.0",
+  "description": "Reviews Bitbucket PRs using ChatGPT and displays the result in the popup",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://bitbucket.org/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://bitbucket.org/*/pull-requests/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}

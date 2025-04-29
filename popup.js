@@ -11,17 +11,41 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.storage.local.get(['latestReview'], (result) => {
       if (result.latestReview) {
         reviewSection.style.display = 'block';
-        // Basic markdown rendering
-        let html = result.latestReview
-          .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-          .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-          .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-          .replace(/^- (.*$)/gm, '<li>$1</li>')
-          .replace(/^```([a-z]*)\n([\s\S]*?)```$/gm, '<pre><code class="$1">$2</code></pre>')
-          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-          .replace(/\n/g, '<br>');
-        // Wrap list items in <ul>
+        let html = result.latestReview;
+
+        // Convert code blocks (```lang\ncode\n```)
+        html = html.replace(/```([a-z]*)\n([\s\S]*?)```/g, (match, lang, code) => {
+          // Escape HTML in code
+          code = code.replace(/[&<>"]'/g, function(m) {
+            return ({
+              '&': '&amp;',
+              '<': '&lt;',
+              '>': '&gt;',
+              '"': '&quot;',
+              "'": '&#39;'
+            })[m];
+          });
+          return `<pre><code class="language-${lang || 'plaintext'}">${code}</code></pre>`;
+        });
+
+        // Inline code: `code`
+        html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+        // Bold: **text**
+        html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+        // Headings
+        html = html.replace(/^### (.*)$/gm, '<h3>$1</h3>');
+        html = html.replace(/^## (.*)$/gm, '<h2>$1</h2>');
+        html = html.replace(/^# (.*)$/gm, '<h1>$1</h1>');
+
+        // Lists
+        html = html.replace(/^- (.*)$/gm, '<li>$1</li>');
         html = html.replace(/(<li>.*<\/li>)/g, '<ul>$1</ul>');
+
+        // Line breaks
+        html = html.replace(/\n/g, '<br>');
+
         reviewContent.innerHTML = html;
       } else {
         reviewSection.style.display = 'none';

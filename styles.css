@@ -95,3 +95,21 @@ button:hover {
 .markdown strong {
   font-weight: bold;
 }
+
+pre code {
+  display: block;
+  padding: 0.5em;
+  background: #f6f8fa;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+  color: #24292f;
+}
+code {
+  background: #f6f8fa;
+  border-radius: 3px;
+  padding: 2px 4px;
+  font-size: 13px;
+  font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+  color: #24292f;
+}

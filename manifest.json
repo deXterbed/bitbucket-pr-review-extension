@@ -6,7 +6,8 @@
   "permissions": [
     "activeTab",
     "storage",
-    "scripting"
+    "scripting",
+    "webNavigation"
   ],
   "host_permissions": [
     "https://bitbucket.org/*"
@@ -16,8 +17,12 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://bitbucket.org/*/pull-requests/*"],
-      "js": ["content.js"]
+      "matches": [
+        "https://bitbucket.org/livecareer/*/pull-requests/*",
+        "https://bitbucket.org/livecareer/*/*/pull-requests/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_start"
     }
   ],
   "action": {

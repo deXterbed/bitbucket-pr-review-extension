@@ -16,15 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Convert code blocks (```lang\ncode\n```)
         html = html.replace(/```([a-z]*)\n([\s\S]*?)```/g, (match, lang, code) => {
           // Escape HTML in code
-          code = code.replace(/[&<>"]'/g, function(m) {
-            return ({
-              '&': '&amp;',
-              '<': '&lt;',
-              '>': '&gt;',
-              '"': '&quot;',
-              "'": '&#39;'
-            })[m];
-          });
+          code = code.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m]));
           return `<pre><code class="language-${lang || 'plaintext'}">${code}</code></pre>`;
         });
 
@@ -97,9 +89,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Listen for review updates
-  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  chrome.runtime.onMessage.addListener((request) => {
     if (request.action === "reviewUpdated") {
-      console.log('Popup received reviewUpdated message');
       loadReview();
     }
   });

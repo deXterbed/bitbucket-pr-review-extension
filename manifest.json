@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "Bitbucket PR Review Extension",
-  "version": "1.0",
+  "name": "Bitbucket PR Review",
+  "version": "0.1.0",
   "description": "Reviews Bitbucket PRs using ChatGPT and displays the result in the popup",
   "permissions": [
     "activeTab",
@@ -27,5 +27,8 @@
   ],
   "action": {
     "default_popup": "popup.html"
+  },
+  "icons": {
+    "128": "128.png"
   }
 }

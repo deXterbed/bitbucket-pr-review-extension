@@ -73,41 +73,50 @@ if (window.location.href.includes('/pull-requests/') && window.location.href.inc
           reviewButton.disabled = true;
           reviewButton.querySelector('.button-text').textContent = 'Reviewing…';
 
-          // Function to attempt extracting the diff with retries
-          const extractDiffWithRetry = (retries = 10, delay = 2000) => {
+          // Function to extract the diff with retries
+          const extractDiff = () => {
             console.log('Attempting to extract diff...');
             showNotification('Extracting diff content...', 'info');
 
-            const diffLines = document.querySelectorAll('.lines-wrapper .code-component');
-            console.log(`Found ${diffLines.length} diff lines with selector .lines-wrapper .code-component`);
-
+            // Select all file diff blocks
+            const fileBlocks = document.querySelectorAll('[data-qa="branch-diff-file"]');
             let diffText = '';
             let hasChanges = false;
 
-            if (diffLines.length > 0) {
-              diffLines.forEach(line => {
-                const lineTypeElement = line.parentElement.querySelector('.diff-line-type');
-                if (lineTypeElement) {
-                  const lineType = lineTypeElement.textContent.trim();
-                  const lineContent = line.textContent.trim();
+            fileBlocks.forEach(fileBlock => {
+              // Get file name
+              const fileHeader = fileBlock.querySelector('[data-qa="bk-filepath"]');
+              const fileName = fileHeader ? fileHeader.textContent.trim() : 'unknown_file';
+              diffText += `diff --git a/${fileName} b/${fileName}\n`;
+              diffText += `--- a/${fileName}\n`;
+              diffText += `+++ b/${fileName}\n`;
 
-                  // Skip empty lines and unchanged lines
-                  if (lineContent && lineType !== ' ') {
-                    hasChanges = true;
-                    const cleanedContent = lineContent.replace(/^[+\-\s]/, '').trim();
-                    diffText += `${lineType} ${cleanedContent}\n`;
-                    console.log(`Extracted line: ${lineType} ${cleanedContent}`);
-                  }
+              // For each hunk in the file
+              const hunks = fileBlock.querySelectorAll('.diff-chunk');
+              hunks.forEach(hunk => {
+                // Get hunk header (if available)
+                const hunkHeader = hunk.querySelector('.chunk-heading');
+                if (hunkHeader) {
+                  diffText += `${hunkHeader.textContent.trim()}\n`;
                 }
+
+                // For each line in the hunk
+                const lines = hunk.querySelectorAll('.code-component');
+                lines.forEach(line => {
+                  const lineTypeElement = line.parentElement.querySelector('.diff-line-type');
+                  if (lineTypeElement) {
+                    const lineType = lineTypeElement.textContent.trim(); // "+", "-", or " "
+                    const lineContent = line.textContent;
+                    diffText += `${lineType}${lineContent}\n`;
+                    if (lineType === '+' || lineType === '-') hasChanges = true;
+                  }
+                });
               });
-            } else {
-              console.log('No diff lines found with .lines-wrapper .code-component');
-            }
+            });
 
             if (diffText && hasChanges) {
               console.log('Diff extracted successfully:', diffText);
               showNotification('Diff extracted successfully', 'success');
-
               // Send the diff to the background script for review
               chrome.runtime.sendMessage({ action: "reviewPR", diff: diffText }, (response) => {
                 console.log('Received response from background script:', response);
@@ -127,21 +136,16 @@ if (window.location.href.includes('/pull-requests/') && window.location.href.inc
                   showNotification('Review generated successfully! Click the extension icon to view.', 'success');
                 }
               });
-            } else if (retries > 0) {
-              // No diff found, retry after a delay
-              console.log(`Diff not found, retrying... (${retries} attempts left)`);
-              showNotification(`Retrying diff extraction... (${retries} attempts left)`, 'info');
-              setTimeout(() => extractDiffWithRetry(retries - 1, delay), delay);
             } else {
-              // Out of retries, show alert
-              console.log('No diff found after all retries.');
+              // No diff found, show alert and reset button
+              console.log('No diff found.');
               showNotification('No changes found in this PR', 'error');
               reviewButton.classList.remove('loading');
               reviewButton.disabled = false;
               reviewButton.querySelector('.button-text').textContent = 'Review this PR';
             }
           };
-          extractDiffWithRetry();
+          extractDiff();
         });
       }
     }

@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Convert code blocks (```lang\ncode\n```)
         html = html.replace(/```([a-z]*)\n([\s\S]*?)```/g, (match, lang, code) => {
-          // Escape HTML in code
           code = code.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m]));
           return `<pre><code class="language-${lang || 'plaintext'}">${code}</code></pre>`;
         });
@@ -27,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
         html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
 
         // Headings
+        html = html.replace(/^#### (.*)$/gm, '<h4>$1</h4>');
         html = html.replace(/^### (.*)$/gm, '<h3>$1</h3>');
         html = html.replace(/^## (.*)$/gm, '<h2>$1</h2>');
         html = html.replace(/^# (.*)$/gm, '<h1>$1</h1>');
@@ -35,10 +35,20 @@ document.addEventListener('DOMContentLoaded', () => {
         html = html.replace(/^- (.*)$/gm, '<li>$1</li>');
         html = html.replace(/(<li>.*<\/li>)/g, '<ul>$1</ul>');
 
-        // Line breaks
-        html = html.replace(/\n/g, '<br>');
+        // Only replace newlines with <br> outside of <pre> blocks
+        html = html.replace(/(<pre[\s\S]*?pre>)/g, '|||$1|||');
+        html = html.split('|||').map((part, i) =>
+          i % 2 === 1 ? part : part.replace(/\n/g, '<br>')
+        ).join('');
 
         reviewContent.innerHTML = html;
+
+        // Highlight code blocks if highlight.js is loaded
+        if (window.hljs) {
+          document.querySelectorAll('pre code').forEach(block => {
+            window.hljs.highlightElement(block);
+          });
+        }
       } else {
         reviewSection.style.display = 'none';
       }

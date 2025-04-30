@@ -96,20 +96,16 @@ button:hover {
   font-weight: bold;
 }
 
-pre code {
-  display: block;
-  padding: 0.5em;
-  background: #f6f8fa;
-  border-radius: 4px;
+pre {
+  border-radius: 6px;
+  padding: 12px;
+  overflow-x: auto;
   font-size: 13px;
-  font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
-  color: #24292f;
+  margin: 1em 0;
 }
 code {
-  background: #f6f8fa;
-  border-radius: 3px;
+  border-radius: 4px;
   padding: 2px 4px;
+  font-family: 'Fira Mono', 'Consolas', 'Monaco', monospace;
   font-size: 13px;
-  font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
-  color: #24292f;
 }

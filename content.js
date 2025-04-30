@@ -151,8 +151,6 @@ function injectReviewButton() {
     reviewButton.querySelector('.button-text').textContent = 'Reviewing…';
 
     const extractDiff = () => {
-      showNotification('Extracting diff content...', 'info');
-
       const fileBlocks = document.querySelectorAll('[data-qa="branch-diff-file"]');
       let diffText = '';
       let hasChanges = false;
@@ -170,22 +168,21 @@ function injectReviewButton() {
           if (hunkHeader) {
             diffText += `${hunkHeader.textContent.trim()}\n`;
           }
+          const hunkHeaderMiddle = hunk.querySelector('.chunk-heading-middle');
+          if (hunkHeaderMiddle) {
+            diffText += `${hunkHeaderMiddle.textContent.trim()}\n`;
+          }
 
           const lines = hunk.querySelectorAll('.code-component');
           lines.forEach(line => {
-            const lineTypeElement = line.parentElement.querySelector('.diff-line-type');
-            if (lineTypeElement) {
-              const lineType = lineTypeElement.textContent.trim();
-              const lineContent = line.textContent;
-              diffText += `${lineType}${lineContent}\n`;
-              if (lineType === '+' || lineType === '-') hasChanges = true;
-            }
+            const lineContent = line.textContent;
+            diffText += `${lineContent}\n`;
+            if (lineContent.startsWith('+') || lineContent.startsWith('-')) hasChanges = true;
           });
         });
       });
 
       if (diffText && hasChanges) {
-        showNotification('Diff extracted successfully', 'success');
         chrome.runtime.sendMessage({ action: "reviewPR", diff: diffText }, (response) => {
           reviewButton.classList.remove('loading');
           reviewButton.disabled = false;
@@ -197,7 +194,7 @@ function injectReviewButton() {
             showNotification(`Error: ${response.error}`, 'error');
           } else {
             chrome.runtime.sendMessage({ action: "reviewUpdated" });
-            showNotification('Review generated successfully! Click the extension icon to view.', 'success');
+            showNotification('Review generated! Please click the extension icon to view.', 'success');
           }
         });
       } else {

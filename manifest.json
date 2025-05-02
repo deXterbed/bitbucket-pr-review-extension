@@ -5,9 +5,7 @@
   "description": "Reviews Bitbucket PRs using ChatGPT and displays the result in the popup",
   "permissions": [
     "activeTab",
-    "storage",
-    "scripting",
-    "webNavigation"
+    "storage"
   ],
   "host_permissions": [
     "https://bitbucket.org/*"

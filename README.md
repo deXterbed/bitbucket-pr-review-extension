@@ -5,10 +5,14 @@ A Chrome extension that adds a "Review this PR" button to Bitbucket pull request
 ## Features
 
 - Adds a **"Review this PR"** button to Bitbucket PR diff pages
-- Extracts the diff from the page and sends it to OpenAI for review
-- Displays the review as formatted Markdown in the extension popup (rendered with `marked`)
-- Securely stores your OpenAI API key locally via `chrome.storage.local`
+- Extracts the diff and sends it to OpenAI for review
+- Displays the review as formatted Markdown in the popup (rendered with `marked`) with diff line highlighting
+- Shows which PR was reviewed and how long ago
+- **Live loading state** — popup shows a spinner while the review is being generated
+- **Copy button** — copies review as rich HTML so formatting is preserved when pasting into Bitbucket comments
+- Inline API key management (no browser dialogs)
 - Green badge notification when a review is ready
+- Securely stores your OpenAI API key locally via `chrome.storage.local`
 
 ## Project Structure
 
@@ -32,7 +36,7 @@ A Chrome extension that adds a "Review this PR" button to Bitbucket pull request
 │       └── prompt.js           # Review prompt template
 ├── icons/
 │   └── 128.png
-├── manifest.json               # Extension manifest (flat references)
+├── manifest.json               # Extension manifest
 ├── build.js                    # Build script (esbuild + clean-css)
 └── package.json                # Dependencies & scripts
 ```
@@ -69,11 +73,13 @@ npm run clean   # Removes dist/ and *.zip
 
 1. Navigate to a Bitbucket PR diff page (`/pull-requests/*/diff`)
 2. Click the **"Review this PR"** button in the PR header
-3. Wait for the green badge to appear, then click the extension icon to view the review
+3. The popup will show a spinner while the review is being generated
+4. Once ready, click the extension icon to read the review
+5. Use the **Copy** button to paste the review into a Bitbucket comment with full formatting
 
 ## Development
 
-The source files under `src/` use ES modules. The build script uses [esbuild](https://esbuild.github.io/) to bundle each entry point (background, content, popup) into IIFE format targeting Chrome 120+, and [clean-css](https://github.com/clean-css/clean-css) for CSS minification. After making changes, run `npm run build` and reload the extension in `chrome://extensions`.
+Source files under `src/` use ES modules. The build script uses [esbuild](https://esbuild.github.io/) to bundle each entry point (background, content, popup) into IIFE format targeting Chrome 120+, and [clean-css](https://github.com/clean-css/clean-css) for CSS minification. After making changes, run `npm run build` and reload the extension in `chrome://extensions`.
 
 ## Troubleshooting
 

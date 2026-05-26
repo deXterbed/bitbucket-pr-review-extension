@@ -1,85 +1,195 @@
 import { marked } from 'marked';
-import { MSG_REVIEW_UPDATED, STORE_API_KEY, STORE_LATEST_REVIEW } from '../shared/constants.js';
+import {
+  MSG_REVIEW_UPDATED, MSG_REVIEW_STARTED,
+  STORE_API_KEY, STORE_LATEST_REVIEW, STORE_REVIEW_META, STORE_REVIEW_STATUS,
+} from '../shared/constants.js';
 
-// Configure marked for safe rendering
-marked.setOptions({
-  breaks: true,
-  gfm: true,
-});
+marked.setOptions({ breaks: true, gfm: true });
 
-// ── DOM refs ─────────────────────────────────────────────────────────────────
+// ── DOM refs ──────────────────────────────────────────────────────────────────
 
-const apiKeySection = document.getElementById('apiKeySection');
-const apiKeyInput = document.getElementById('apiKey');
-const saveButton = document.getElementById('saveButton');
-const settingsButton = document.getElementById('settingsButton');
-const reviewSection = document.getElementById('reviewSection');
-const reviewContent = document.getElementById('reviewContent');
+const apiKeySection    = document.getElementById('apiKeySection');
+const apiKeyInput      = document.getElementById('apiKey');
+const saveButton       = document.getElementById('saveButton');
+const apiKeyFeedback   = document.getElementById('apiKeyFeedback');
+const settingsButton   = document.getElementById('settingsButton');
+const confirmBar       = document.getElementById('confirmBar');
+const confirmClearBtn  = document.getElementById('confirmClearBtn');
+const cancelClearBtn   = document.getElementById('cancelClearBtn');
+const reviewSection    = document.getElementById('reviewSection');
+const loadingState     = document.getElementById('loadingState');
+const emptyState       = document.getElementById('emptyState');
+const reviewCard       = document.getElementById('reviewCard');
+const reviewContent    = document.getElementById('reviewContent');
+const metaUrl          = document.getElementById('metaUrl');
+const metaTime         = document.getElementById('metaTime');
+const copyButton       = document.getElementById('copyButton');
 
-// ── Review rendering ─────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
-function renderReview(markdown) {
-  reviewSection.style.display = 'block';
+function highlightDiffLines(container) {
+  container.querySelectorAll('pre code').forEach((block) => {
+    const lines = block.innerHTML.split('\n');
+    const wrapped = lines
+      .filter((line) => line.replace(/<[^>]+>/g, '').trim() !== '')
+      .map((line) => {
+        const text = line.replace(/<[^>]+>/g, '');
+        if (text.startsWith('+')) return `<span class="diff-add">${line}</span>`;
+        if (text.startsWith('-')) return `<span class="diff-remove">${line}</span>`;
+        return `<span class="diff-neutral">${line}</span>`;
+      });
+    block.innerHTML = wrapped.join('\n');
+  });
+}
+
+function formatRelativeTime(timestamp) {
+  const diff = Date.now() - timestamp;
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
+
+function showFeedback(message, isError = false) {
+  apiKeyFeedback.textContent = message;
+  apiKeyFeedback.className = `feedback-msg ${isError ? 'error' : 'success'}`;
+  setTimeout(() => { apiKeyFeedback.className = 'feedback-msg'; }, 3000);
+}
+
+// ── Review states ─────────────────────────────────────────────────────────────
+
+function showLoading() {
+  loadingState.style.display  = 'flex';
+  emptyState.style.display    = 'none';
+  reviewCard.style.display    = 'none';
+  copyButton.style.display    = 'none';
+}
+
+function showEmpty() {
+  loadingState.style.display  = 'none';
+  emptyState.style.display    = 'flex';
+  reviewCard.style.display    = 'none';
+  copyButton.style.display    = 'none';
+}
+
+function showReview(markdown, meta) {
+  loadingState.style.display  = 'none';
+  emptyState.style.display    = 'none';
+  reviewCard.style.display    = 'block';
+  copyButton.style.display    = 'flex';
+
   reviewContent.innerHTML = marked.parse(markdown);
+  highlightDiffLines(reviewContent);
+
+  if (meta?.url) {
+    metaUrl.textContent = meta.url.replace(/^https?:\/\//, '');
+    metaUrl.href = meta.url;
+  }
+  metaTime.textContent = meta?.timestamp ? formatRelativeTime(meta.timestamp) : '';
 }
 
 async function loadReview() {
-  const { [STORE_LATEST_REVIEW]: review } = await chrome.storage.local.get(STORE_LATEST_REVIEW);
-  if (review) {
-    renderReview(review);
+  const result = await chrome.storage.local.get([
+    STORE_LATEST_REVIEW, STORE_REVIEW_META, STORE_REVIEW_STATUS,
+  ]);
+
+  reviewSection.style.display = 'block';
+
+  if (result[STORE_REVIEW_STATUS] === 'reviewing') {
+    showLoading();
+  } else if (result[STORE_LATEST_REVIEW]) {
+    showReview(result[STORE_LATEST_REVIEW], result[STORE_REVIEW_META]);
   } else {
-    reviewSection.style.display = 'none';
+    showEmpty();
   }
 }
 
-// ── API key management ───────────────────────────────────────────────────────
-
-async function loadApiKey() {
-  const { [STORE_API_KEY]: key } = await chrome.storage.local.get(STORE_API_KEY);
-  return key;
-}
+// ── API key management ────────────────────────────────────────────────────────
 
 async function updateApiKeyUI() {
-  const key = await loadApiKey();
+  const { [STORE_API_KEY]: key } = await chrome.storage.local.get(STORE_API_KEY);
   if (key) {
     apiKeySection.style.display = 'none';
-    settingsButton.style.display = 'block';
+    settingsButton.style.display = 'flex';
+    await loadReview();
   } else {
     apiKeySection.style.display = 'block';
     settingsButton.style.display = 'none';
-    apiKeyInput.value = '';
+    reviewSection.style.display = 'none';
+    confirmBar.style.display = 'none';
   }
 }
 
 saveButton.addEventListener('click', async () => {
   const key = apiKeyInput.value.trim();
   if (!key) {
-    alert('Please enter a valid API key.');
+    showFeedback('Please enter a valid API key.', true);
     return;
   }
   await chrome.storage.local.set({ [STORE_API_KEY]: key });
-  alert('API key saved successfully!');
+  apiKeyInput.value = '';
+  showFeedback('API key saved!');
   await updateApiKeyUI();
 });
 
-settingsButton.addEventListener('click', async () => {
-  if (!confirm('Are you sure you want to clear the OpenAI API key?')) return;
+// ── Settings confirm ──────────────────────────────────────────────────────────
+
+settingsButton.addEventListener('click', () => {
+  confirmBar.style.display = confirmBar.style.display === 'none' ? 'flex' : 'none';
+});
+
+confirmClearBtn.addEventListener('click', async () => {
   await chrome.storage.local.remove(STORE_API_KEY);
-  alert('API key cleared successfully.');
+  confirmBar.style.display = 'none';
   await updateApiKeyUI();
 });
 
-// ── Live updates ─────────────────────────────────────────────────────────────
+cancelClearBtn.addEventListener('click', () => {
+  confirmBar.style.display = 'none';
+});
+
+// ── Copy button ───────────────────────────────────────────────────────────────
+
+copyButton.addEventListener('click', async () => {
+  const html = reviewContent.innerHTML;
+  const text = reviewContent.innerText;
+
+  try {
+    await navigator.clipboard.write([
+      new ClipboardItem({
+        'text/html': new Blob([html], { type: 'text/html' }),
+        'text/plain': new Blob([text], { type: 'text/plain' }),
+      }),
+    ]);
+  } catch {
+    await navigator.clipboard.writeText(text);
+  }
+
+  const original = copyButton.innerHTML;
+  copyButton.textContent = 'Copied!';
+  copyButton.classList.add('copied');
+  setTimeout(() => {
+    copyButton.innerHTML = original;
+    copyButton.classList.remove('copied');
+  }, 2000);
+});
+
+// ── Live updates ──────────────────────────────────────────────────────────────
 
 chrome.runtime.onMessage.addListener((request) => {
+  if (request.action === MSG_REVIEW_STARTED) {
+    reviewSection.style.display = 'block';
+    showLoading();
+  }
   if (request.action === MSG_REVIEW_UPDATED) {
     loadReview();
   }
 });
 
-// ── Init ─────────────────────────────────────────────────────────────────────
+// ── Init ──────────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await loadReview();
   await updateApiKeyUI();
 });

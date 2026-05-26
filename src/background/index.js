@@ -1,4 +1,4 @@
-import { MSG_REVIEW_PR, MSG_REVIEW_UPDATED, STORE_API_KEY, STORE_LATEST_REVIEW } from '../shared/constants.js';
+import { MSG_REVIEW_PR, MSG_REVIEW_UPDATED, STORE_API_KEY, STORE_LATEST_REVIEW, STORE_REVIEW_META } from '../shared/constants.js';
 import { requestReview } from './reviewer.js';
 
 /**
@@ -15,7 +15,10 @@ async function handleReviewPR(request, sendResponse) {
 
     const review = await requestReview(request.diff, apiKey);
 
-    await chrome.storage.local.set({ [STORE_LATEST_REVIEW]: review });
+    await chrome.storage.local.set({
+      [STORE_LATEST_REVIEW]: review,
+      [STORE_REVIEW_META]: { url: request.url, timestamp: Date.now() },
+    });
     sendResponse({ review });
   } catch (err) {
     sendResponse({ error: err.message || 'Unknown error during review.' });

@@ -20,10 +20,13 @@ export const REVIEW_BUTTON_ID = 'review-pr-button';
 // ── Message Actions ──────────────────────────────────────────────────────────
 export const MSG_REVIEW_PR = 'reviewPR';
 export const MSG_REVIEW_UPDATED = 'reviewUpdated';
+export const MSG_REVIEW_STARTED = 'reviewStarted';
 
 // ── Storage Keys ─────────────────────────────────────────────────────────────
 export const STORE_API_KEY = 'openaiApiKey';
 export const STORE_LATEST_REVIEW = 'latestReview';
+export const STORE_REVIEW_META = 'reviewMeta';
+export const STORE_REVIEW_STATUS = 'reviewStatus';
 
 // ── API ──────────────────────────────────────────────────────────────────────
 export const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';

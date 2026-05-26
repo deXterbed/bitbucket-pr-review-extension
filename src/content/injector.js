@@ -1,4 +1,4 @@
-import { CONTAINER_SELECTORS, REVIEW_BUTTON_ID, MSG_REVIEW_PR, MSG_REVIEW_UPDATED } from '../shared/constants.js';
+import { CONTAINER_SELECTORS, REVIEW_BUTTON_ID, MSG_REVIEW_PR, MSG_REVIEW_UPDATED, MSG_REVIEW_STARTED, STORE_REVIEW_STATUS } from '../shared/constants.js';
 import { BUTTON_CSS } from './styles.js';
 import { extractDiff } from './extractor.js';
 import { showNotification } from './notification.js';
@@ -86,7 +86,10 @@ async function handleReviewClick() {
       return;
     }
 
-    const response = await chrome.runtime.sendMessage({ action: MSG_REVIEW_PR, diff });
+    await chrome.storage.local.set({ [STORE_REVIEW_STATUS]: 'reviewing' });
+    chrome.runtime.sendMessage({ action: MSG_REVIEW_STARTED });
+
+    const response = await chrome.runtime.sendMessage({ action: MSG_REVIEW_PR, diff, url: location.href });
 
     if (!response) {
       showNotification('No response from review process', 'error');
@@ -99,6 +102,7 @@ async function handleReviewClick() {
   } catch (err) {
     showNotification(`Unexpected error: ${err.message}`, 'error');
   } finally {
+    await chrome.storage.local.set({ [STORE_REVIEW_STATUS]: 'idle' });
     btn.classList.remove('loading');
     btn.disabled = false;
     label.textContent = 'Review this PR';

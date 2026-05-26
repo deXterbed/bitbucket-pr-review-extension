@@ -1,18 +1,22 @@
 # Bitbucket PR Review Extension
 
+![Version](https://img.shields.io/badge/version-0.2.0-blue)
+
 A Chrome extension that adds a "Review this PR" button to Bitbucket pull request diff pages, generating AI-powered code reviews using OpenAI's GPT models.
 
 ## Features
 
 - Adds a **"Review this PR"** button to Bitbucket PR diff pages
 - Extracts the diff and sends it to OpenAI for review
-- Displays the review as formatted Markdown in the popup (rendered with `marked`) with diff line highlighting
+- Displays the review as formatted Markdown in the popup with diff line highlighting
 - Shows which PR was reviewed and how long ago
 - **Live loading state** — popup shows a spinner while the review is being generated
 - **Copy button** — copies review as rich HTML so formatting is preserved when pasting into Bitbucket comments
-- Inline API key management (no browser dialogs)
+- **Configurable model** — type any OpenAI model ID (`gpt-4o`, `gpt-4o-mini`, future models, etc.)
+- Diff size guard — warns before sending oversized diffs to the API
+- Inline settings (no browser dialogs) — manage your API key and model from the popup
 - Green badge notification when a review is ready
-- Securely stores your OpenAI API key locally via `chrome.storage.local`
+- Securely stores your API key and settings locally via `chrome.storage.local`
 
 ## Project Structure
 

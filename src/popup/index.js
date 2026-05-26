@@ -191,5 +191,6 @@ chrome.runtime.onMessage.addListener((request) => {
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', async () => {
+  chrome.action.setBadgeText({ text: '' });
   await updateApiKeyUI();
 });

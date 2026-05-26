@@ -49,7 +49,3 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-// Clear badge when extension icon is clicked
-chrome.action.onClicked.addListener(() => {
-  chrome.action.setBadgeText({ text: '' });
-});

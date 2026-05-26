@@ -1,4 +1,4 @@
-import { CONTAINER_SELECTORS, REVIEW_BUTTON_ID, MSG_REVIEW_PR, MSG_REVIEW_UPDATED, MSG_REVIEW_STARTED, STORE_REVIEW_STATUS } from '../shared/constants.js';
+import { CONTAINER_SELECTORS, REVIEW_BUTTON_ID, MSG_REVIEW_PR, MSG_REVIEW_UPDATED, MSG_REVIEW_STARTED, STORE_REVIEW_STATUS, DIFF_CHAR_LIMIT } from '../shared/constants.js';
 import { BUTTON_CSS } from './styles.js';
 import { extractDiff } from './extractor.js';
 import { showNotification } from './notification.js';
@@ -83,6 +83,12 @@ async function handleReviewClick() {
 
     if (!diff || !hasChanges) {
       showNotification('No changes found in this PR', 'error');
+      return;
+    }
+
+    if (diff.length > DIFF_CHAR_LIMIT) {
+      const kb = Math.round(diff.length / 1024);
+      showNotification(`Diff is too large (${kb}KB) to review in one pass. Try reviewing individual files.`, 'error');
       return;
     }
 

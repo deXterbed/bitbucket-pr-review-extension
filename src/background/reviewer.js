@@ -5,9 +5,10 @@ import { SYSTEM_PROMPT, buildUserMessage } from '../shared/prompt.js';
  * Calls the OpenAI Chat Completions API to generate a code review.
  * @param {string} diff - The Git diff text.
  * @param {string} apiKey - OpenAI API key.
+ * @param {string} [model] - OpenAI model to use.
  * @returns {Promise<string>} The review markdown.
  */
-export async function requestReview(diff, apiKey) {
+export async function requestReview(diff, apiKey, model = OPENAI_MODEL) {
   const response = await fetch(OPENAI_API_URL, {
     method: 'POST',
     headers: {
@@ -15,7 +16,7 @@ export async function requestReview(diff, apiKey) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: OPENAI_MODEL,
+      model,
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: buildUserMessage(diff) },

@@ -30,9 +30,10 @@ export const STORE_REVIEW_STATUS = 'reviewStatus';
 
 // ── API ──────────────────────────────────────────────────────────────────────
 export const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
-export const OPENAI_MODEL = 'gpt-4o-mini';
+export const OPENAI_MODEL = 'gpt-4o';
 export const OPENAI_MAX_TOKENS = 4000;
 export const DIFF_CHAR_LIMIT = 100000;
+export const STORE_MODEL = 'openaiModel';
 
 // ── UI ───────────────────────────────────────────────────────────────────────
 export const NOTIFICATION_DURATION_MS = 3000;

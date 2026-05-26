@@ -28,13 +28,31 @@
     </button>
   </div>
 
-  <!-- Inline confirm bar (appears when Settings is clicked) -->
-  <div id="confirmBar" class="confirm-bar" style="display:none">
-    <span class="confirm-text">Clear your API key?</span>
-    <div class="confirm-actions">
-      <button id="confirmClearBtn" class="btn-sm btn-danger">Clear</button>
+  <!-- Settings panel (appears when Settings is clicked) -->
+  <div id="settingsPanel" class="settings-panel" style="display:none">
+    <div class="settings-row">
+      <label for="modelSelect" class="settings-label">Model</label>
+      <div class="settings-control">
+        <input id="modelInput" class="model-input" list="modelSuggestions" placeholder="gpt-4o">
+        <datalist id="modelSuggestions">
+          <option value="gpt-4o">
+          <option value="gpt-4o-mini">
+          <option value="gpt-4-turbo">
+        </datalist>
+        <button id="saveModelBtn" class="btn-sm btn-primary-sm">Save</button>
+      </div>
+    </div>
+    <div class="settings-sep"></div>
+    <div class="settings-row">
+      <span class="settings-label">API Key</span>
+      <button id="clearKeyBtn" class="btn-sm btn-danger">Clear key</button>
+    </div>
+    <div id="confirmClearRow" class="confirm-row" style="display:none">
+      <span>Are you sure?</span>
+      <button id="confirmClearBtn" class="btn-sm btn-danger">Yes, clear</button>
       <button id="cancelClearBtn" class="btn-sm btn-ghost">Cancel</button>
     </div>
+    <p id="modelFeedback" class="settings-feedback"></p>
   </div>
 
   <!-- API key form -->

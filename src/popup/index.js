@@ -2,6 +2,7 @@ import { marked } from 'marked';
 import {
   MSG_REVIEW_UPDATED, MSG_REVIEW_STARTED,
   STORE_API_KEY, STORE_LATEST_REVIEW, STORE_REVIEW_META, STORE_REVIEW_STATUS,
+  STORE_MODEL, OPENAI_MODEL,
 } from '../shared/constants.js';
 
 marked.setOptions({ breaks: true, gfm: true });
@@ -13,9 +14,14 @@ const apiKeyInput      = document.getElementById('apiKey');
 const saveButton       = document.getElementById('saveButton');
 const apiKeyFeedback   = document.getElementById('apiKeyFeedback');
 const settingsButton   = document.getElementById('settingsButton');
-const confirmBar       = document.getElementById('confirmBar');
+const settingsPanel    = document.getElementById('settingsPanel');
+const modelInput       = document.getElementById('modelInput');
+const saveModelBtn     = document.getElementById('saveModelBtn');
+const clearKeyBtn      = document.getElementById('clearKeyBtn');
+const confirmClearRow  = document.getElementById('confirmClearRow');
 const confirmClearBtn  = document.getElementById('confirmClearBtn');
 const cancelClearBtn   = document.getElementById('cancelClearBtn');
+const modelFeedback    = document.getElementById('modelFeedback');
 const reviewSection    = document.getElementById('reviewSection');
 const loadingState     = document.getElementById('loadingState');
 const emptyState       = document.getElementById('emptyState');
@@ -109,16 +115,18 @@ async function loadReview() {
 // ── API key management ────────────────────────────────────────────────────────
 
 async function updateApiKeyUI() {
-  const { [STORE_API_KEY]: key } = await chrome.storage.local.get(STORE_API_KEY);
+  const { [STORE_API_KEY]: key, [STORE_MODEL]: model } =
+    await chrome.storage.local.get([STORE_API_KEY, STORE_MODEL]);
   if (key) {
     apiKeySection.style.display = 'none';
     settingsButton.style.display = 'flex';
+    modelInput.value = model || OPENAI_MODEL;
     await loadReview();
   } else {
     apiKeySection.style.display = 'block';
     settingsButton.style.display = 'none';
     reviewSection.style.display = 'none';
-    confirmBar.style.display = 'none';
+    settingsPanel.style.display = 'none';
   }
 }
 
@@ -134,20 +142,36 @@ saveButton.addEventListener('click', async () => {
   await updateApiKeyUI();
 });
 
-// ── Settings confirm ──────────────────────────────────────────────────────────
+// ── Settings panel ────────────────────────────────────────────────────────────
 
 settingsButton.addEventListener('click', () => {
-  confirmBar.style.display = confirmBar.style.display === 'none' ? 'flex' : 'none';
+  const isOpen = settingsPanel.style.display !== 'none';
+  settingsPanel.style.display = isOpen ? 'none' : 'block';
+  confirmClearRow.style.display = 'none';
+  modelFeedback.textContent = '';
+});
+
+saveModelBtn.addEventListener('click', async () => {
+  const model = modelInput.value.trim();
+  if (!model) return;
+  await chrome.storage.local.set({ [STORE_MODEL]: model });
+  modelFeedback.textContent = 'Saved!';
+  setTimeout(() => { modelFeedback.textContent = ''; }, 2000);
+});
+
+clearKeyBtn.addEventListener('click', () => {
+  confirmClearRow.style.display = 'flex';
 });
 
 confirmClearBtn.addEventListener('click', async () => {
   await chrome.storage.local.remove(STORE_API_KEY);
-  confirmBar.style.display = 'none';
+  settingsPanel.style.display = 'none';
+  confirmClearRow.style.display = 'none';
   await updateApiKeyUI();
 });
 
 cancelClearBtn.addEventListener('click', () => {
-  confirmBar.style.display = 'none';
+  confirmClearRow.style.display = 'none';
 });
 
 // ── Copy button ───────────────────────────────────────────────────────────────

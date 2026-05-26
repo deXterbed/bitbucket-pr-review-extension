@@ -1,4 +1,4 @@
-import { MSG_REVIEW_PR, MSG_REVIEW_UPDATED, STORE_API_KEY, STORE_LATEST_REVIEW, STORE_REVIEW_META } from '../shared/constants.js';
+import { MSG_REVIEW_PR, MSG_REVIEW_UPDATED, STORE_API_KEY, STORE_LATEST_REVIEW, STORE_REVIEW_META, STORE_MODEL, OPENAI_MODEL } from '../shared/constants.js';
 import { requestReview } from './reviewer.js';
 
 /**
@@ -6,14 +6,15 @@ import { requestReview } from './reviewer.js';
  */
 async function handleReviewPR(request, sendResponse) {
   try {
-    const { [STORE_API_KEY]: apiKey } = await chrome.storage.local.get(STORE_API_KEY);
+    const { [STORE_API_KEY]: apiKey, [STORE_MODEL]: model } =
+      await chrome.storage.local.get([STORE_API_KEY, STORE_MODEL]);
 
     if (!apiKey) {
       sendResponse({ error: 'OpenAI API key not set. Please set it in the extension popup.' });
       return;
     }
 
-    const review = await requestReview(request.diff, apiKey);
+    const review = await requestReview(request.diff, apiKey, model || OPENAI_MODEL);
 
     await chrome.storage.local.set({
       [STORE_LATEST_REVIEW]: review,

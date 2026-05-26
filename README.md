@@ -1,52 +1,86 @@
 # Bitbucket PR Review Extension
 
-This Chrome extension adds a "Review this PR" button to Bitbucket pull request diff pages, allowing you to generate AI-powered code reviews using OpenAI's GPT models.
+A Chrome extension that adds a "Review this PR" button to Bitbucket pull request diff pages, generating AI-powered code reviews using OpenAI's GPT models.
 
 ## Features
-- Adds a "Review this PR" button to Bitbucket PR diff pages
-- Extracts the diff and sends it to OpenAI for review
-- Displays the review in the extension popup
-- Securely stores your OpenAI API key locally
 
-## Installation (Local/Development)
+- Adds a **"Review this PR"** button to Bitbucket PR diff pages
+- Extracts the diff from the page and sends it to OpenAI for review
+- Displays the review as formatted Markdown in the extension popup (rendered with `marked`)
+- Securely stores your OpenAI API key locally via `chrome.storage.local`
+- Green badge notification when a review is ready
 
-1. **Clone or Download the Repository**
-   ```sh
-   git clone <this-repo-url>
-   cd <repo-directory>
-   ```
+## Project Structure
 
-2. **Open Chrome Extensions Page**
-   - Go to `chrome://extensions` in your Chrome browser.
-   - Enable **Developer mode** (toggle in the top right).
+```
+├── src/
+│   ├── background/             # Service worker
+│   │   ├── index.js            # Message routing & badge handling
+│   │   └── reviewer.js         # OpenAI API call
+│   ├── content/                # Content script
+│   │   ├── index.js            # Orchestrator & URL change detection
+│   │   ├── injector.js         # Button injection & click handler
+│   │   ├── extractor.js        # Diff extraction from DOM
+│   │   ├── notification.js     # Toast notifications
+│   │   └── styles.js           # Injected CSS
+│   ├── popup/                  # Extension popup
+│   │   ├── index.js            # UI logic (uses marked)
+│   │   ├── index.html
+│   │   └── styles.css
+│   └── shared/                 # Shared modules
+│       ├── constants.js        # Selectors, storage keys, config
+│       └── prompt.js           # Review prompt template
+├── icons/
+│   └── 128.png
+├── manifest.json               # Extension manifest (flat references)
+├── build.js                    # Build script (esbuild + clean-css)
+└── package.json                # Dependencies & scripts
+```
 
-3. **Load the Unpacked Extension**
-   - Click **Load unpacked**.
-   - Select the root directory of this project (where `manifest.json` is located).
+## Getting Started
 
-4. **Set Your OpenAI API Key**
-   - Click the extension icon in Chrome's toolbar.
-   - Enter your OpenAI API key in the popup and save it.
+### Prerequisites
 
-5. **Usage**
-   - Navigate to a Bitbucket pull request diff page (URL should contain `/pull-requests/` and `/diff`).
-   - Click the "Review this PR" button that appears near the PR header.
-   - Wait for the review to be generated. You will see a notification when it's ready.
-   - Click the extension icon to view the review in the popup.
+- [Node.js](https://nodejs.org/) 18+
 
-## Notes
-- The extension only works on Bitbucket PR diff pages (URLs like `https://bitbucket.org/<workspace>/<repo>/pull-requests/<id>/diff`).
-- Your OpenAI API key is stored locally and never shared.
-- If you update the code, click the **Reload** button on the `chrome://extensions` page to apply changes.
+### Setup
+
+```sh
+git clone git@github.com:deXterbed/bitbucket-pr-review-extension.git
+cd bitbucket-pr-review-extension
+npm install
+```
+
+### Build
+
+```sh
+npm run build   # Bundles & minifies to dist/
+npm run zip     # Creates bitbucket-pr-review-extension-vX.X.X.zip
+npm run clean   # Removes dist/ and *.zip
+```
+
+### Load in Chrome
+
+1. Go to `chrome://extensions`, enable **Developer mode**
+2. Click **Load unpacked** and select the `dist/` directory
+3. Click the extension icon, enter your OpenAI API key, and save
+
+### Usage
+
+1. Navigate to a Bitbucket PR diff page (`/pull-requests/*/diff`)
+2. Click the **"Review this PR"** button in the PR header
+3. Wait for the green badge to appear, then click the extension icon to view the review
+
+## Development
+
+The source files under `src/` use ES modules. The build script uses [esbuild](https://esbuild.github.io/) to bundle each entry point (background, content, popup) into IIFE format targeting Chrome 120+, and [clean-css](https://github.com/clean-css/clean-css) for CSS minification. After making changes, run `npm run build` and reload the extension in `chrome://extensions`.
 
 ## Troubleshooting
-- If the button does not appear, make sure you are on a PR diff page and have reloaded the extension after any code changes.
-- Check the extension's permissions and ensure it is enabled.
-- If you encounter issues, try removing and re-adding the extension.
+
+- **Button not appearing?** Make sure you're on a PR diff page, reload the extension, and check the console for errors.
+- **Review fails?** Verify your OpenAI API key is set, has quota available, and the extension has the required permissions.
+- **Build issues?** Delete `dist/` and `node_modules/`, then run `npm install && npm run build`.
 
 ## Uninstalling
-- Go to `chrome://extensions`, find the extension, and click **Remove**.
 
----
-
-Feel free to contribute or open issues for improvements!
+Go to `chrome://extensions`, find the extension, and click **Remove**.

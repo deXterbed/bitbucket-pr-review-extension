@@ -1,0 +1,19 @@
+{
+  "name": "bitbucket-pr-review-extension",
+  "version": "0.1.0",
+  "description": "Chrome extension that reviews Bitbucket PRs using ChatGPT",
+  "private": true,
+  "scripts": {
+    "build": "node build.js",
+    "zip": "node build.js --zip",
+    "clean": "rm -rf dist *.zip"
+  },
+  "dependencies": {
+    "marked": "^15.0.0"
+  },
+  "devDependencies": {
+    "archiver": "^7.0.1",
+    "clean-css": "^5.3.3",
+    "esbuild": "^0.24.0"
+  }
+}

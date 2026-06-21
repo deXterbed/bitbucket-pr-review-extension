@@ -2,6 +2,8 @@
 
 ![Version](https://img.shields.io/badge/version-0.2.0-blue)
 
+[Available on the Chrome Web Store](https://chromewebstore.google.com/detail/grok-everywhere/onddcpahoenacjcgkldfegocdgdgajpn)
+
 A Chrome extension that adds a "Review this PR" button to Bitbucket pull request diff pages, generating AI-powered code reviews using OpenAI's GPT models.
 
 ## Features
